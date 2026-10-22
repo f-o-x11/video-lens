@@ -450,6 +450,27 @@ further. Fast suite: **122 passed** (121 plus the new contract test). Deployed w
 
   The two language bugs are pinned as strict xfails in `tests/test_real_videos.py`.
 
+**Update (2026-10-19).** All three fetcher bugs are fixed, with T1 tests first
+(`tests/test_fetch_transcript.py`). The auto-dub fix needed no R3: YouTube marks
+auto-dubbed tracks `variant=timing-optimized` in their timedtext URL (checked on every
+fixture: originals carry `gemini` or nothing), so the fetcher ranks them last without
+`YTDLP_LANGUAGE`. The first A/B attempt (2026-10-19) found that the 5.2 arm's discovery
+loop ran the *installed* skill's scripts and bypassed replay; the harness now pins the loop
+to the copy. YouTube blocked downloads again after one fixture, so the gate is still open.
+
+**Update (2026-10-19, later).** The four small Phase 1 items are done, tests first:
+
+| Item | As shipped | Files |
+|---|---|---|
+| S9 | The renderer strips `[…]` suffixes from `AGENT_MODEL`. The 5 existing `[1m]` reports keep the suffix. | `render_report.py` |
+| S8 (script half) | `--replace REPORT`, exclusive with `--output-dir` and the positional path. The target must exist under the reports root and belong to the payload's video (`ERROR:RENDER_REPLACE_MISMATCH`). It keeps its filename, `generationDate` and `durationSeconds`, so the time before the user asked for a revision is not counted. The Revisions section now uses it. | `render_report.py`, `SKILL.md` |
+| S1 | `parse_request`: a language name anywhere (English or native; 25 languages); a code only alone or among filler words, because two-letter words in a sentence are often words (`de`, `it`). Other words make the whole request an `EXTRA_REQUEST:`, and Step 3 weights it. Step 1 now passes the user's words, not a code. `polish` and `indonesia` are left out of the map; Hebrew is left out because YouTube may list it as `iw`. | `preflight.py`, `SKILL.md` |
+| R6 + S5 | `CAPABILITIES:` lists `whisper` (Darwin arm64), `mlx-whisper`, `ffmpeg`, and `yt-dlp` or `yt-dlp-outdated`. The version subprocess (~0.2 s) runs only where `whisper` is listed. The fallback is offered only when `whisper` is listed (replacing `uname -sm`). `transcribe_local.py` stops with `ERROR:WHISPER_UNSUPPORTED_PLATFORM` before the import check. Its subprocess tests now skip off Apple Silicon. | `preflight.py`, `transcribe_local.py`, `SKILL.md` |
+
+Fast suite: 190 passed. The SKILL.md edits (Step 1 input and lines, Step 3 focus sentence,
+fallback condition, Revisions, error table) are prompt changes. They join the open A/B gate
+below; no fixture yet exercises a focus request or a revision.
+
 **Regression gate (not yet run).** The fast suite tests scripts, and the
 scripts did not change, so it says nothing about model behaviour. The gate is an A/B run: 5.2
 (`REF=c3f42be`) against 5.3 (`REF=0dc5b58`), on both Claude and qwen. Their scripts differ
