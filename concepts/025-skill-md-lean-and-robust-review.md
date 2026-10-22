@@ -471,8 +471,14 @@ Fast suite: 190 passed. The SKILL.md edits (Step 1 input and lines, Step 3 focus
 fallback condition, Revisions, error table) are prompt changes. They join the open A/B gate
 below; no fixture yet exercises a focus request or a revision.
 
-**Regression gate (not yet run).** The fast suite tests scripts, and the
-scripts did not change, so it says nothing about model behaviour. The gate is an A/B run: 5.2
+**Update (2026-10-22): released as 5.4.** The owner ran the regression gate below and
+reported it passing (the run results are not in this checkout). The fetcher fixes and the
+four Phase 1 items above shipped as SKILL.md 5.4. Everything still open from this document
+(R1–R5, the 024 carry-overs, and two request-parsing bugs found in review) is collected in
+`concepts/027-open-backlog.md`.
+
+**Regression gate (passed, see above).** As planned for 5.3, when no script had changed:
+the fast suite tests scripts, so it said nothing about model behaviour. The gate is an A/B run: 5.2
 (`REF=c3f42be`) against 5.3 (`REF=0dc5b58`), on both Claude and qwen. Their scripts differ
 only by #5, which does nothing on POSIX paths. That moves the §8 eval harness ahead of
 Phase 1.
